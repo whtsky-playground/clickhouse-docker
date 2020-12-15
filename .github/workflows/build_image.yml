@@ -21,6 +21,17 @@ jobs:
         cd ClickHouse
         git checkout v20.12.3.3-stable
         git submodule update --init --recursive 
+    - name: Cache ccache
+      uses: actions/cache@v2
+      env:
+        cache-name: ccache
+      with:
+        path: ~/.ccache
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ matrix.compiler }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
     - name: Build clickhouse binary
       run: |
         cd ClickHouse/docker/packager/
