@@ -23,7 +23,7 @@ jobs:
         git submodule update
     - name: Build clickhouse binary
       run: |
-        cd docker/packager/
+        cd ClickHouse/docker/packager/
         mkdir dist
         ./packager --package-type binary --output-dir dist/ --compiler ${{ matrix.compiler }}
     - uses: actions/upload-artifact@v2
