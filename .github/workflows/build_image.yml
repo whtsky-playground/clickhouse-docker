@@ -17,10 +17,10 @@ jobs:
         python-version: 3.9
     - name: Get clickhouse code
       run: |
-        git clone --recursive https://github.com/ClickHouse/ClickHouse.git
+        git clone https://github.com/ClickHouse/ClickHouse.git
         cd ClickHouse
         git checkout v20.12.3.3-stable
-        git submodule update
+        git submodule update --init --recursive 
     - name: Build clickhouse binary
       run: |
         cd ClickHouse/docker/packager/
