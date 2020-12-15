@@ -24,9 +24,9 @@ jobs:
     - name: Build clickhouse binary
       run: |
         cd ClickHouse/docker/packager/
-        mkdir dist
-        ./packager --package-type binary --output-dir dist/ --compiler ${{ matrix.compiler }}
+        mkdir dist_${{ matrix.compiler }}
+        ./packager --package-type binary --output-dir dist_${{ matrix.compiler }}/ --compiler ${{ matrix.compiler }}
     - uses: actions/upload-artifact@v2
       with:
         name: dist
-        path: ClickHouse/docker/packager/dist/
+        path: ClickHouse/docker/packager/dist_${{ matrix.compiler }}/
