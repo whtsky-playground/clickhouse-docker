@@ -53,4 +53,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: dist
-          path: ClickHouse/docker/packager/dist_${{ matrix.arch }}/
+          path: ClickHouse/docker/packager/dist_${{ matrix.arch }}/clickhouse
