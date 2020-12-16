@@ -5,6 +5,23 @@ on:
   push:
     branches:
 jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs: 
+      upload_url: ${{ steps.create_release.outputs.upload_url }} 
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ env.VERSION }}@${{ github.ref }}
+          draft: true
+          prerelease: false
+
   build:
     runs-on: ubuntu-latest
     strategy:
@@ -54,37 +71,12 @@ jobs:
         with:
           name: dist
           path: ClickHouse/docker/packager/dist_${{ matrix.arch }}/clickhouse
-  
-  upload-artifact:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ env.VERSION }}@${{ github.ref }}
-          draft: true
-          prerelease: false
-      - name: Upload Release Asset
-        id: upload-release-asset 
+      - id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: ClickHouse/docker/packager/dist_amd64/clickhouse
-          asset_name: clickhouse_amd64
-      - name: Upload Release Asset
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} 
-          asset_path: ClickHouse/docker/packager/dist_arm64/clickhouse
-          asset_name: clickhouse_arm64
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
+          asset_path: ClickHouse/docker/packager/dist_${{ matrix.arch }}/clickhouse
+          asset_name: clickhouse-${{ matrix.arch }}
 
