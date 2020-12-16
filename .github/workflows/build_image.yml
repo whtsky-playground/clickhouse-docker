@@ -11,7 +11,7 @@ jobs:
         compiler: ["clang-11", "clang-11-aarch64"]
     steps:
       - name: Maximize build disk space
-        uses: easimon/maximize-build-space@ad3a54f8b164ae1b4e13a7e20e5a575e2ec1247f
+        uses: whtsky/maximize-build-space@234e01f22ff43e7f71d76bd54b2b96e664608f2d
         with:
           remove-dotnet: true
           remove-android: true
