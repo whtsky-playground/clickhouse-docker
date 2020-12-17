@@ -23,8 +23,8 @@ jobs:
           cp ClickHouse/programs/server/users.xml build_context/
       - uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: build_context
+          name: config
+          path: build_context/
   create_release:
     name: Create Release
     runs-on: ubuntu-20.04
@@ -41,10 +41,9 @@ jobs:
           release_name: ${{ env.VERSION }}@${{ github.ref }}
           draft: true
           prerelease: false
-
   build_binary:
     needs: create_release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
     strategy:
       matrix:
         include:
@@ -94,8 +93,8 @@ jobs:
           mv ClickHouse/docker/packager/dist_${{ matrix.arch }}/clickhouse build_context/clickhouse-${{ matrix.arch }}
       - uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: build_context
+          name: binary-${{ matrix.arch }}
+          path: build_context/
       - id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
@@ -104,3 +103,41 @@ jobs:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: build_context/clickhouse-${{ matrix.arch }}
           asset_name: clickhouse-${{ matrix.arch }}
+
+  build_docker:
+    needs: [build_binary, prepare_build_context]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Login to Github Package
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.PACKAGE_TOKEN }}
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: build_context
+      - name: Flatten artifacts
+        run: mv **/* .
+        working-directory: build_context
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: build_context
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: user/app:latest
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          platform: "linux/amd64,linux/arm64"
+          context: build_context
+          tags: 'ghcr.io/${{ github.repository_owner }}/clickhouse-docker:${{ env.VERSION }}'
