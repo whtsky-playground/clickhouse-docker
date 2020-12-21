@@ -103,6 +103,7 @@ jobs:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: build_context/clickhouse-${{ matrix.arch }}
           asset_name: clickhouse-${{ matrix.arch }}
+          asset_content_type: "application/binary"
 
   build_docker:
     needs: [build_binary, prepare_build_context]
