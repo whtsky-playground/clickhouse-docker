@@ -39,6 +39,7 @@ RUN groupadd -r clickhouse --gid=999 \
 ADD https://github.com/tianon/gosu/releases/download/$gosu_ver/gosu-${TARGETARCH} /bin/gosu
 
 COPY clickhouse-${TARGETARCH} /usr/bin/clickhouse
+RUN chmod +x /usr/bin/clickhouse
 RUN ln -s /usr/bin/clickhouse /usr/bin/clickhouse-server 
 
 RUN chmod +x \
